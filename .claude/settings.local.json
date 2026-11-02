@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Test-Path \"C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse\\\\frontend\\\\node_modules\"; Test-Path \"C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse\\\\backend\\\\node_modules\"; \\(Get-Command node -ErrorAction SilentlyContinue\\).Source; node --version 2>$null)",
+      "PowerShell($env:PORT = 4000; Start-Process npm -ArgumentList 'run','dev' -WorkingDirectory 'C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse' -WindowStyle Hidden -RedirectStandardOutput 'C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse\\\\dev.log' -RedirectStandardError 'C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse\\\\dev.log'; Start-Sleep -Milliseconds 3000; Get-Content -Tail 20 'C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse\\\\dev.log')",
+      "PowerShell(Start-Process npm -ArgumentList 'run','dev' -WorkingDirectory 'C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse' -WindowStyle Hidden -RedirectStandardOutput 'C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse\\\\dev.out.log' -RedirectStandardError 'C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse\\\\dev.err.log'; Start-Sleep -Milliseconds 5000; Get-Content -Tail 25 'C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse\\\\dev.out.log'; '--- ERR ---'; Get-Content -Tail 20 'C:\\\\Users\\\\user\\\\Downloads\\\\authverse\\\\authverse\\\\dev.err.log' -ErrorAction SilentlyContinue)",
+      "PowerShell(npm run *)",
+      "PowerShell(Start-Sleep -Seconds 8; $r1 = Invoke-WebRequest -Uri 'http://localhost:5173/' -Method GET -TimeoutSec 10 -ErrorAction SilentlyContinue; \"FRONTEND 5173: \" + \\($r1.StatusCode\\); $r2 = Invoke-WebRequest -Uri 'http://localhost:4000/api/auth/me' -Method GET -TimeoutSec 10 -ErrorAction SilentlyContinue; \"BACKEND 4000: \" + \\($r2.StatusCode\\))",
+      "PowerShell($r = Invoke-WebRequest -Uri 'http://localhost:5173/' -Method GET -TimeoutSec 15 -UseBasicParsing -ErrorAction SilentlyContinue; \"FRONTEND 5173 status: \" + $r.StatusCode; \"Tamanho HTML: \" + \\($r.Content.Length\\))"
+    ]
+  }
+}

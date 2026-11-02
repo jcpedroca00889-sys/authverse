@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AUTHVERSE">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c084fc" />
+      <stop offset=".5" stop-color="#60a5fa" />
+      <stop offset="1" stop-color="#22d3ee" />
+    </linearGradient>
+    <radialGradient id="bg" cx="50%" cy="0%" r="100%">
+      <stop offset="0" stop-color="#1a0b3d" />
+      <stop offset="1" stop-color="#05030f" />
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="b" />
+      <feMerge>
+        <feMergeNode in="b" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  <g filter="url(#glow)">
+    <path d="M256 76 424 172v168L256 436 88 340V172z" fill="#0b0720" stroke="url(#g)" stroke-width="22" stroke-linejoin="round" />
+    <path d="M88 172 256 268l168-96M256 268v168" fill="none" stroke="url(#g)" stroke-width="18" stroke-linecap="round" />
+    <circle cx="256" cy="268" r="26" fill="#fff" />
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+{
+  "name": "AUTHVERSE",
+  "short_name": "Authverse",
+  "description": "Autenticação segura em um universo neon.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#05030f",
+  "theme_color": "#05030f",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
