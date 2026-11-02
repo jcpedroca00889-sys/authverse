@@ -114,6 +114,12 @@ git push -u origin main
    - `PORT` → `4000` (opcional)
 4. Dê o **Deploy**.
 
+> **Importante:** nas configurações do projeto na Vercel (Settings → General), o **Install Command** deve incluir `--no-omit=dev` nas três instalações, senão o `vite` (devDependency) não é instalado e a build falha com `vite: command not found`:
+>
+> ```
+> npm install --no-omit=dev && npm install --prefix backend --no-omit=dev && npm install --prefix frontend --no-omit=dev
+> ```
+
 O que acontece no deploy:
 - O front-end é buildado com Vite e servido como arquivos estáticos (`frontend/dist`)
 - A API roda como função serverless da Vercel (`api/index.mjs`) nas rotas `/api/*`
