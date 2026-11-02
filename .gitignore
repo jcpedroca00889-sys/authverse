@@ -3,7 +3,6 @@ dist
 frontend/dist
 
 # Variáveis de ambiente (não commitar secrets)
-.env
 .env.local
 .env.*.local
 
