@@ -35,7 +35,11 @@ export default function SuccessBurst({ show }: { show: boolean }) {
             initial={{ scale: 0.6, opacity: 0, filter: 'blur(8px)' }}
             animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
             exit={{ scale: 1.25, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+            transition={{
+              scale: { type: 'spring', stiffness: 260, damping: 18 },
+              opacity: { type: 'spring', stiffness: 260, damping: 18 },
+              filter: { duration: 0.4, ease: 'easeOut' }, // Prevents spring overshoot into negative blur
+            }}
             className="relative grid place-items-center"
           >
             <svg viewBox="0 0 88 88" className="h-24 w-24 drop-shadow-[0_0_24px_rgba(34,211,238,.8)]">
