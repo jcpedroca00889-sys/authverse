@@ -1,47 +1,27 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { randomUUID } from 'node:crypto';
-import { fileURLToPath } from 'node:url';
+import { rpc } from '../services/supabase.js';
 
-const FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'users.json');
-let queue = Promise.resolve();
+/**
+ * Contas de usuário vivem no Supabase (tabelas `app_users` / `app_sessions`),
+ * acessadas só por RPCs SECURITY DEFINER — nunca por escrita de arquivo.
+ *
+ * Histórico: antes esta camada gravava em `backend/database/users.json`, o que
+ * funciona localmente mas quebra no Vercel (filesystem somente leitura), onde
+ * todo cadastro retornava HTTP 500. O arquivo `users.json` foi removido.
+ */
 
-async function read() {
-  try {
-    return JSON.parse(await fs.readFile(FILE, 'utf8'));
-  } catch (e) {
-    if (e.code === 'ENOENT') return { users: [] };
-    throw e;
-  }
-}
+/** Cria a conta + sessão. Retorna `{ token, username }`. */
+export const create = async (username, password) =>
+  rpc('app_register', { p_username: username, p_password: password });
 
-// Escrita atômica: grava em arquivo temporário e renomeia (nunca deixa JSON pela metade).
-async function write(data) {
-  const tmp = `${FILE}.${process.pid}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(data, null, 2), 'utf8');
-  await fs.rename(tmp, FILE);
-}
+/** Autentica e abre sessão. Retorna `{ token, username }`. */
+export const authenticate = async (username, password) =>
+  rpc('app_login', { p_username: username, p_password: password });
 
-// Fila: serializa escritas para evitar condição de corrida entre cadastros simultâneos.
-function locked(fn) {
-  const run = queue.then(fn);
-  queue = run.catch(() => {});
-  return run;
-}
+/** Perfil completo da sessão (ou `null` se o token expirou/é inválido). */
+export const profile = async (token) => (token ? rpc('app_me', { p_token: token }) : null);
 
-export const findByUsername = async (username) =>
-  (await read()).users.find((u) => u.username.toLowerCase() === username.toLowerCase());
-
-export const findById = async (id) => (await read()).users.find((u) => u.id === id);
-
-export const create = (username, passwordHash) =>
-  locked(async () => {
-    const db = await read();
-    if (db.users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
-      throw Object.assign(new Error('Username em uso'), { code: 'USERNAME_TAKEN' });
-    }
-    const user = { id: randomUUID(), username, password: passwordHash, createdAt: new Date().toISOString() };
-    db.users.push(user);
-    await write(db);
-    return user;
-  });
+/** Invalida a sessão no banco (usado no logout). */
+export const destroySession = async (token) => {
+  if (!token) return;
+  await rpc('app_logout', { p_token: token });
+};

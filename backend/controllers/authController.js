@@ -1,5 +1,4 @@
 import * as authService from '../services/authService.js';
-import * as store from '../database/userStore.js';
 import { asyncHandler, HttpError } from '../middleware/errors.js';
 
 const COOKIE = {
@@ -10,26 +9,36 @@ const COOKIE = {
 };
 const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
-const startSession = (res, user, status = 200) =>
-  res
-    .cookie('session', authService.sign(user), { ...COOKIE, maxAge: SEVEN_DAYS })
+/** Monta a resposta com o usuário público a partir do perfil vindo do banco. */
+async function startSession(res, session, status = 200) {
+  const profile = await authService.profile(session.token);
+  if (!profile) throw new HttpError(503, 'Sessão criada, mas o perfil não pôde ser carregado. Tente entrar novamente.');
+
+  return res
+    .cookie('session', authService.sign(session), { ...COOKIE, maxAge: SEVEN_DAYS })
     .status(status)
-    .json({ user: authService.publicUser(user) });
+    .json({ user: authService.publicUser(profile) });
+}
 
 export const register = asyncHandler(async (req, res) => {
   const { username, password, confirmPassword } = req.body ?? {};
-  startSession(res, await authService.register(username, password, confirmPassword), 201);
+  const session = await authService.register(username, password, confirmPassword);
+  await startSession(res, session, 201);
 });
 
 export const login = asyncHandler(async (req, res) => {
   const { username, password } = req.body ?? {};
-  startSession(res, await authService.login(username, password));
+  const session = await authService.login(username, password);
+  await startSession(res, session);
 });
 
-export const logout = (_req, res) => res.clearCookie('session', COOKIE).json({ ok: true });
+export const logout = asyncHandler(async (req, res) => {
+  await authService.logout(authService.tokenFromCookie(req.cookies?.session));
+  res.clearCookie('session', COOKIE).json({ ok: true });
+});
 
 export const me = asyncHandler(async (req, res) => {
-  const user = await store.findById(req.userId);
-  if (!user) throw new HttpError(401, 'Sessão inválida ou expirada.');
-  res.json({ user: authService.publicUser(user) });
+  const profile = await authService.profile(req.sessionToken);
+  if (!profile) throw new HttpError(401, 'Sessão inválida ou expirada.');
+  res.json({ user: authService.publicUser(profile) });
 });

@@ -1,10 +1,9 @@
-{
+﻿{
   "name": "authverse-backend",
   "private": true,
   "type": "module",
   "scripts": { "dev": "node --watch server.js", "start": "node server.js" },
   "dependencies": {
-    "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "express": "^4.21.1",
     "express-rate-limit": "^7.4.1",
@@ -12,3 +11,4 @@
     "jsonwebtoken": "^9.0.2"
   }
 }
+
