@@ -12,7 +12,13 @@ import { container, item } from '../animations/variants';
 
 type Key = 'username' | 'password' | 'confirm';
 
-export default function AuthForm({ mode, onSwitch }: { mode: 'login' | 'register'; onSwitch: () => void }) {
+interface Props {
+  mode: 'login' | 'register';
+  onSwitch: () => void;
+  onSuccess?: () => void;
+}
+
+export default function AuthForm({ mode, onSwitch, onSuccess }: Props) {
   const isReg = mode === 'register';
   const { login, register } = useAuth();
   const toast = useToast();
@@ -38,6 +44,7 @@ export default function AuthForm({ mode, onSwitch }: { mode: 'login' | 'register
     try {
       if (isReg) { await register(f.username, f.password, f.confirm); toast('success', 'Conta criada! Bem-vindo ao Authverse.'); }
       else { await login(f.username, f.password); toast('success', 'Acesso autorizado.'); }
+      onSuccess?.();
     } catch (ex) {
       const a = ex as ApiError;
       if (a.field) setServer({ [a.field === 'confirmPassword' ? 'confirm' : a.field]: a.message });

@@ -47,6 +47,7 @@ export const api = {
 
   // Admin product CRUD
   products: {
+    list: () => productRequest<{ products: any[] }>('/'),
     create: (data: object) => productPost<{ product: any }>('/', data),
     update: (id: string, data: object) => productPut<{ product: any }>(`/${id}`, data),
     delete: (id: string) => productDelete<{ ok: true }>(`/${id}`),

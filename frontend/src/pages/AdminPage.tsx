@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Plus, Trash2, Edit, Search, X, Loader2, AlertCircle, CheckCircle,
-  ChevronDown, ChevronUp, Save, Download, Upload, LayoutGrid,
+  ChevronDown, Save, LayoutGrid, ArrowLeft,
 } from 'lucide-react';
 import HoloCard from '../components/HoloCard';
 import TextField from '../components/TextField';
@@ -10,8 +10,11 @@ import MagneticButton from '../components/MagneticButton';
 import { useToast } from '../components/Toast';
 import { useAuth } from '../hooks/useAuth';
 import { usePrefs } from '../hooks/usePrefs';
-import { api, Product } from '../services/api';
-import { CATEGORIES, SORTS, type Category, type SortKey, type Accent, type Glyph, brl } from '../services/store';
+import { api } from '../services/api';
+import {
+  CATEGORIES, SORTS, brl,
+  type Category, type SortKey, type Accent, type Glyph, type Product,
+} from '../services/store';
 
 const ACCENTS: { id: Accent; label: string; color: string }[] = [
   { id: 'violet', label: 'Violeta', color: '#a855f7' },
@@ -484,8 +487,8 @@ export default function AdminPage() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const list = await api.products.list();
-      setProducts(list);
+      const data = await api.products.list();
+      setProducts(data.products ?? []);
       setError('');
     } catch (e: any) {
       setError(e.message);
@@ -595,6 +598,16 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                window.history.pushState({}, '', '/');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-cyan-300/50 hover:text-cyan-200"
+            >
+              <ArrowLeft size={14} /> Voltar à loja
+            </button>
             <span className="text-xs text-slate-400 hidden sm:block">Admin: {user.username}</span>
             <MagneticButton onClick={() => setShowForm(true)} className="gap-2">
               <Plus size={16} /> Novo Produto

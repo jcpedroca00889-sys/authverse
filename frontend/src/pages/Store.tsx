@@ -32,7 +32,11 @@ function SkeletonCard() {
   );
 }
 
-export default function Store() {
+interface StoreProps {
+  onAdminClick?: () => void;
+}
+
+export default function Store({ onAdminClick }: StoreProps) {
   const { user, logout } = useAuth();
   const { reduce } = usePrefs();
   const toast = useToast();
@@ -145,7 +149,7 @@ export default function Store() {
       animate={{ opacity: 1 }}
       className="relative z-10 min-h-screen"
     >
-      <StoreNav user={user} onLogout={out} onFilter={(f) => setTypeFilter(f as ProductType | 'all')} activeFilter={typeFilter} />
+      <StoreNav user={user} onLogout={out} onFilter={(f) => setTypeFilter(f as ProductType | 'all')} activeFilter={typeFilter} onAdminClick={onAdminClick} />
 
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6 sm:pt-14">

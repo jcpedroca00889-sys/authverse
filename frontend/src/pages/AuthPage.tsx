@@ -6,7 +6,11 @@ import HoloCard from '../components/HoloCard';
 import ModeSwitch from '../components/ModeSwitch';
 import { usePrefs } from '../hooks/usePrefs';
 
-export default function AuthPage() {
+interface Props {
+  onSuccess?: () => void;
+}
+
+export default function AuthPage({ onSuccess }: Props) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const { reduce } = usePrefs();
   const dir = mode === 'login' ? -1 : 1;
@@ -36,7 +40,7 @@ export default function AuthPage() {
               exit={reduce ? { opacity: 0 } : { opacity: 0, rotateY: -55 * dir, x: -40 * dir, scale: 0.96, filter: 'blur(10px)' }}
               transition={{ duration: reduce ? 0 : 0.38, ease: [0.22, 1, 0.36, 1] }}
             >
-              <AuthForm mode={mode} onSwitch={() => setMode(mode === 'login' ? 'register' : 'login')} />
+              <AuthForm mode={mode} onSwitch={() => setMode(mode === 'login' ? 'register' : 'login')} onSuccess={onSuccess} />
             </motion.div>
           </AnimatePresence>
         </HoloCard>

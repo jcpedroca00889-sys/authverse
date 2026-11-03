@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { LogOut, ShieldCheck, ChevronDown } from 'lucide-react';
+import { LogOut, ShieldCheck, ChevronDown, LayoutDashboard } from 'lucide-react';
 import BrandMark from './BrandMark';
 import type { User } from '../../services/api';
 import { TYPES, typeLabel } from '../../services/store';
@@ -10,12 +10,14 @@ interface Props {
   onLogout: () => void;
   onFilter: (filter: string) => void;
   activeFilter: string;
+  onAdminClick?: () => void;
 }
 
-export default function StoreNav({ user, onLogout, onFilter, activeFilter }: Props) {
+export default function StoreNav({ user, onLogout, onFilter, activeFilter, onAdminClick }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const initials = user.username.slice(0, 2).toUpperCase();
+  const isAdmin = user.isAdmin === true;
 
   useEffect(() => {
     if (!open) return;
@@ -60,6 +62,16 @@ export default function StoreNav({ user, onLogout, onFilter, activeFilter }: Pro
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          {isAdmin && onAdminClick && (
+            <button
+              type="button"
+              onClick={onAdminClick}
+              className="hidden items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-xs font-semibold text-violet-200 transition hover:border-violet-300/60 hover:text-violet-100 sm:inline-flex"
+            >
+              <LayoutDashboard size={14} /> Painel Admin
+            </button>
+          )}
+
           <div ref={ref} className="relative">
             <button
               type="button"
@@ -108,7 +120,26 @@ export default function StoreNav({ user, onLogout, onFilter, activeFilter }: Pro
                         <ShieldCheck size={12} /> Cookie HttpOnly
                       </dd>
                     </div>
+                    {isAdmin && (
+                      <div className="flex items-center justify-between gap-2">
+                        <dt className="text-slate-500">Role</dt>
+                        <dd className="flex items-center gap-1 text-violet-300">
+                          <LayoutDashboard size={12} /> Admin
+                        </dd>
+                      </div>
+                    )}
                   </dl>
+
+                  {isAdmin && onAdminClick && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => { setOpen(false); onAdminClick(); }}
+                      className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-violet-200 transition hover:bg-violet-500/10"
+                    >
+                      <LayoutDashboard size={14} /> Painel Admin
+                    </button>
+                  )}
 
                   <button
                     type="button"
