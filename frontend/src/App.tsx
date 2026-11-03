@@ -35,7 +35,7 @@ export default function App() {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [user, loading]);
 
-  const isAdmin = user?.username === 'admin';
+  const isAdmin = user?.isAdmin === true;
 
   return (
     <>

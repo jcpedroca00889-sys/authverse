@@ -468,8 +468,8 @@ export default function AdminPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<Product | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Check if user is admin
-  const isAdmin = user?.username === 'admin';
+  // Check if user is admin (from JWT claim)
+  const isAdmin = user?.isAdmin === true;
 
   useEffect(() => {
     if (authLoading) return;

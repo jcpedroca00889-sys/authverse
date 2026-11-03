@@ -1,6 +1,25 @@
 import * as store from '../database/productStore.js';
 import { asyncHandler, HttpError } from '../middleware/errors.js';
 
+/** Log de auditoria para ações de produto. */
+function auditLog(req, action, details = {}) {
+  const timestamp = new Date().toISOString();
+  const user = req.userProfile?.username || 'unknown';
+  const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+  
+  const logEntry = {
+    timestamp,
+    user,
+    ip,
+    action,
+    details,
+    path: req.path,
+    method: req.method,
+  };
+  
+  console.log('[AUDIT:PRODUCT]', JSON.stringify(logEntry));
+}
+
 export const list = asyncHandler(async (req, res) => {
   const category = typeof req.query.category === 'string' ? req.query.category : undefined;
   const q = typeof req.query.q === 'string' ? req.query.q.slice(0, 60) : undefined;
@@ -83,6 +102,9 @@ export const create = asyncHandler(async (req, res) => {
     releasedAt: data.releasedAt,
   });
 
+  // Auditoria
+  auditLog(req, 'PRODUCT_CREATED', { productId: product.id, productName: product.name });
+
   res.status(201).json({ product });
 });
 
@@ -142,12 +164,25 @@ export const update = asyncHandler(async (req, res) => {
   const { id: _, createdAt, ...allowedUpdates } = data;
 
   const product = await store.update(id, allowedUpdates);
+  
+  // Auditoria
+  auditLog(req, 'PRODUCT_UPDATED', { productId: id, productName: product?.name, changes: Object.keys(allowedUpdates) });
+  
   res.json({ product });
 });
 
 export const remove = asyncHandler(async (req, res) => {
   const id = String(req.params.id);
+  
+  // Busca o produto antes de deletar para log
+  const existing = await store.findById(id);
+  if (!existing) throw new HttpError(404, 'Produto não encontrado.');
+
   const success = await store.remove(id);
   if (!success) throw new HttpError(404, 'Produto não encontrado.');
+  
+  // Auditoria
+  auditLog(req, 'PRODUCT_DELETED', { productId: id, productName: existing.name });
+  
   res.json({ ok: true });
 });

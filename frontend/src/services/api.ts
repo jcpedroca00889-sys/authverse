@@ -1,4 +1,9 @@
-export interface User { id: string; username: string; createdAt: string }
+export interface User { 
+  id: string; 
+  username: string; 
+  createdAt: string;
+  isAdmin?: boolean;
+}
 
 export class ApiError extends Error {
   constructor(message: string, public field?: string, public status = 0) { super(message); }

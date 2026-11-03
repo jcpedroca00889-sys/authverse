@@ -26,6 +26,20 @@ function loadSecret() {
 }
 const SECRET = loadSecret();
 
+/** Lista de usernames admin vindos da variável de ambiente (separados por vírgula). */
+function getAdminUsernames() {
+  const env = process.env.ADMIN_USERNAMES;
+  if (!env) return ['admin']; // fallback seguro
+  return env.split(',').map(u => u.trim().toLowerCase()).filter(Boolean);
+}
+
+/** Verifica se um username é admin. */
+export function isAdminUsername(username) {
+  if (!username) return false;
+  const admins = getAdminUsernames();
+  return admins.includes(username.toLowerCase());
+}
+
 function validate(username, password) {
   if (typeof username !== 'string' || !USERNAME_RE.test(username))
     throw new HttpError(400, 'Username deve ter 3 a 20 caracteres (letras, números e _).', 'username');
@@ -72,11 +86,14 @@ export async function login(username, password) {
   }
 }
 
-/** Perfil da sessão; `null` quando o token não vale mais. */
+/** Perfil da sessão; `null` quando o token não vale mais. Inclui flag isAdmin. */
 export async function profile(token) {
   if (!token) return null;
   try {
-    return await store.profile(token);
+    const profile = await store.profile(token);
+    if (!profile) return null;
+    // Adiciona flag isAdmin baseada na variável de ambiente
+    return { ...profile, isAdmin: isAdminUsername(profile.username) };
   } catch (e) {
     console.error('[auth] falha ao ler sessão:', e);
     throw unavailable();
@@ -87,14 +104,21 @@ export async function logout(token) {
   try {
     await store.destroySession(token);
   } catch (e) {
-    // Logout nunca deve falhar para o usuário: o cookie é limpo de qualquer forma.
     console.warn('[auth] falha ao encerrar sessão no banco:', e.message);
   }
 }
 
-/** Cookie assinado guarda o token da sessão do Supabase. */
-export const sign = (session) => jwt.sign({ sub: session.token }, SECRET, { expiresIn: '7d' });
+/** Cookie assinado guarda o token da sessão do Supabase + claim isAdmin. */
+export const sign = (session) => {
+  const isAdmin = isAdminUsername(session.username);
+  return jwt.sign(
+    { sub: session.token, username: session.username, isAdmin },
+    SECRET,
+    { expiresIn: '7d' }
+  );
+};
 
+/** Extrai o token da sessão do cookie JWT. */
 export const tokenFromCookie = (cookie) => {
   try {
     return jwt.verify(cookie, SECRET).sub;
@@ -103,4 +127,19 @@ export const tokenFromCookie = (cookie) => {
   }
 };
 
-export const publicUser = (p) => ({ id: p.username, username: p.username, createdAt: p.created_at });
+/** Extrai o payload completo do JWT (inclui isAdmin). */
+export const payloadFromCookie = (cookie) => {
+  try {
+    return jwt.verify(cookie, SECRET);
+  } catch {
+    return null;
+  }
+};
+
+/** Retorna apenas dados públicos do usuário (+ isAdmin). */
+export const publicUser = (p) => ({
+  id: p.username,
+  username: p.username,
+  createdAt: p.created_at,
+  isAdmin: isAdminUsername(p.username),
+});
